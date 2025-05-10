@@ -1,0 +1,513 @@
+import 'package:flutter/material.dart';  
+
+// Constantes globales  
+class AppColors {  
+  static const Color primaryColor = Colors.indigo;  
+  static const Color secondaryColor = Colors.orange;  
+  static const Color backgroundColor = Colors.grey;  
+  static const Color textColor = Colors.white;  
+}  
+
+// Clase FAQ  
+class FAQItem {  
+  final String question;  
+  final String answer;  
+
+  FAQItem({required this.question, required this.answer});  
+}  
+
+// Lista de preguntas frecuentes  
+List<FAQItem> faqList = [  
+  FAQItem(  
+    question: '¿Cómo puedo cambiar mi contraseña?',  
+    answer: 'Para cambiar tu contraseña, ve a la sección de configuración y busca la opción "Cambiar contraseña".',  
+  ),  
+  FAQItem(  
+    question: '¿Cuáles son los métodos de pago aceptados?',  
+    answer: 'Aceptamos tarjetas de crédito, transferencias bancarias y pagos en efectivo en nuestras sucursales.',  
+  ),  
+  FAQItem(  
+    question: '¿Cómo contacto al soporte técnico?',  
+    answer: 'Puedes contactar al soporte técnico desde el menú de ayuda o escribiendo a soporte@ejemplo.com.',  
+  ),  
+  FAQItem(  
+    question: '¿Dónde puedo ver el historial de mis pedidos?',  
+    answer: 'El historial de pedidos se encuentra en la sección "Mis compras" dentro de tu perfil.',  
+  ),  
+  FAQItem(  
+    question: '¿Puedo cancelar una suscripción?',  
+    answer: 'Sí, puedes cancelar tu suscripción desde la sección de suscripciones en tu cuenta.',  
+  ),  
+  FAQItem(  
+    question: '¿Qué hago si olvidé mi contraseña?',  
+    answer: 'Haz clic en "¿Olvidaste tu contraseña?" en la pantalla de inicio de sesión para restablecerla.',  
+  ),  
+  FAQItem(  
+    question: '¿Cómo actualizo mi dirección de envío?',  
+    answer: 'Puedes actualizar tu dirección desde tu perfil, en la sección "Direcciones".',  
+  ),  
+  FAQItem(  
+    question: '¿El envío tiene algún costo?',  
+    answer: 'El costo del envío depende del monto total de la compra y tu ubicación. Consulta nuestras políticas para más detalles.',  
+  ),  
+];
+
+
+void main() {  
+  runApp(MyApp());  
+}  
+
+class MyApp extends StatelessWidget {  
+  @override  
+  Widget build(BuildContext context) {  
+    return MaterialApp(  
+      title: 'App Demo',  
+      theme: ThemeData(  
+        primarySwatch: Colors.indigo,  
+        scaffoldBackgroundColor: Colors.grey[100],  
+        visualDensity: VisualDensity.adaptivePlatformDensity,  
+      ),  
+      home: LoginScreen(),  
+      debugShowCheckedModeBanner: false,  
+    );  
+  }  
+}  
+
+// Proveedor de autenticación  
+class AuthProvider with ChangeNotifier {  
+  String? _user;  
+
+  String? get user => _user;  
+
+  void login(String user) {  
+    _user = user;  
+    notifyListeners();  
+  }  
+
+  void logout() {  
+    _user = null;  
+    notifyListeners();  
+  }  
+}  
+
+class LoginScreen extends StatelessWidget {  
+  final _formKey = GlobalKey<FormState>();  
+  final userController = TextEditingController();  
+  final passController = TextEditingController();  
+  final AuthProvider _authProvider = AuthProvider();  
+
+  void _login(BuildContext context) {  
+    if (_formKey.currentState!.validate()) {  
+      _authProvider.login(userController.text);  
+      Navigator.pushReplacement(  
+        context,  
+        MaterialPageRoute(builder: (context) => MenuScreen()),  
+      );  
+    }  
+  }  
+
+  void showSnackBar(BuildContext context, String message) {  
+    ScaffoldMessenger.of(context).showSnackBar(  
+      SnackBar(content: Text(message)),  
+    );  
+  }  
+
+  @override  
+  Widget build(BuildContext context) {  
+    return Scaffold(  
+      body: Center(  
+        child: SingleChildScrollView(  
+          child: Padding(  
+            padding: const EdgeInsets.all(24.0),  
+            child: Form(  
+              key: _formKey,  
+              child: Column(  
+                mainAxisAlignment: MainAxisAlignment.center,  
+                children: [  
+                  Icon(Icons.account_circle, size: 80, color: AppColors.primaryColor),  
+                  SizedBox(height: 20),  
+                  Text("Iniciar Sesión",   
+                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),  
+                  SizedBox(height: 30),  
+                  CustomTextField(  
+                    labelText: 'Nombre de usuario',  
+                    controller: userController,  
+                    prefixIcon: Icons.person,  
+                    obscureText: false,  
+                  ),  
+                  SizedBox(height: 15),  
+                  CustomTextField(  
+                    labelText: 'Contraseña',  
+                    controller: passController,  
+                    prefixIcon: Icons.lock,  
+                    obscureText: true,  
+                  ),  
+                  SizedBox(height: 25),  
+                  ElevatedButton(  
+                    onPressed: () => _login(context),  
+                    style: ElevatedButton.styleFrom(  
+                      minimumSize: Size(double.infinity, 50),  
+                      shape: RoundedRectangleBorder(  
+                        borderRadius: BorderRadius.circular(8),  
+                      ),  
+                    ),  
+                    child: Text('Ingresar', style: TextStyle(fontSize: 18)),  
+                  ),  
+                ],  
+              ),  
+            ),  
+          ),  
+        ),  
+      ),  
+    );  
+  }  
+}  
+
+// Widget personalizado para TextField  
+class CustomTextField extends StatelessWidget {
+  final String labelText;
+  final TextEditingController controller;
+  final IconData? prefixIcon;
+  final bool obscureText;
+  final TextInputType keyboardType;
+
+  const CustomTextField({
+    required this.labelText,
+    required this.controller,
+    this.prefixIcon,
+    this.obscureText = false,
+    this.keyboardType = TextInputType.text,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: labelText,
+        border: OutlineInputBorder(),
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+      ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Este campo es obligatorio';
+        }
+        return null;
+      },
+    );
+  }
+}
+
+
+// Pantalla de menú principal  
+class MenuScreen extends StatelessWidget {  
+  final AuthProvider _authProvider = AuthProvider();  
+
+  void _logout(BuildContext context) {  
+    _authProvider.logout();  
+    Navigator.pushReplacement(  
+      context,  
+      MaterialPageRoute(builder: (context) => LoginScreen()),  
+    );  
+  }  
+
+  @override  
+  Widget build(BuildContext context) {  
+    return Scaffold(  
+      appBar: AppBar(  
+        title: Text('Menú Principal'),  
+        centerTitle: true,  
+      ),  
+      body: Padding(  
+        padding: const EdgeInsets.all(24.0),  
+        child: Column(  
+          mainAxisAlignment: MainAxisAlignment.center,  
+          children: [  
+            _buildMenuButton(  
+              context,  
+              icon: Icons.question_answer,  
+              label: 'Listado de Preguntas',  
+              destination: PreguntasScreen(),  
+            ),  
+            SizedBox(height: 15),  
+            _buildMenuButton(  
+              context,  
+              icon: Icons.person_add,  
+              label: 'Registro de Usuario',  
+              destination: RegistroScreen(),  
+            ),  
+            SizedBox(height: 15),  
+            _buildMenuButton(  
+              context,  
+              icon: Icons.calculate,  
+              label: 'Calculadora',  
+              destination: Calculadora(),  
+            ),  
+            Spacer(),  
+            OutlinedButton.icon(  
+              onPressed: () => _logout(context),  
+              icon: Icon(Icons.exit_to_app),  
+              label: Text('Cerrar Sesión'),  
+              style: OutlinedButton.styleFrom(  
+                minimumSize: Size(double.infinity, 50),  
+                side: BorderSide(color: AppColors.primaryColor),  
+              ),  
+            ),  
+          ],  
+        ),  
+      ),  
+    );  
+  }  
+
+  Widget _buildMenuButton(BuildContext context, {  
+    required IconData icon,  
+    required String label,  
+    required Widget destination,  
+  }) {  
+    return ElevatedButton.icon(  
+      onPressed: () {  
+        Navigator.push(context, MaterialPageRoute(builder: (context) => destination));  
+      },  
+      icon: Icon(icon),  
+      label: Text(label),  
+      style: ElevatedButton.styleFrom(  
+        minimumSize: Size(double.infinity, 50),  
+        shape: RoundedRectangleBorder(  
+          borderRadius: BorderRadius.circular(8),  
+        ),  
+      ),  
+    );  
+  }  
+}  
+
+// Pantalla de preguntas frecuentes  
+class PreguntasScreen extends StatelessWidget {  
+  @override  
+  Widget build(BuildContext context) {  
+    return Scaffold(  
+      appBar: AppBar(  
+        title: Text('Preguntas Frecuentes'),  
+        centerTitle: true,  
+      ),  
+      body: ListView.builder(  
+        padding: EdgeInsets.all(16),  
+        itemCount: faqList.length,  
+        itemBuilder: (context, index) {  
+          return FAQItemCard(item: faqList[index]);  
+        },  
+      ),  
+    );  
+  }  
+}  
+
+// Tarjeta para las preguntas frecuentes  
+class FAQItemCard extends StatelessWidget {  
+  final FAQItem item;  
+
+  const FAQItemCard({required this.item});  
+
+  @override  
+  Widget build(BuildContext context) {  
+    return Card(  
+      margin: EdgeInsets.symmetric(vertical: 8),  
+      elevation: 2,  
+      child: ExpansionTile(  
+        title: Text(  
+          item.question,  
+          style: TextStyle(fontWeight: FontWeight.bold),  
+        ),  
+        children: [  
+          Padding(  
+            padding: EdgeInsets.all(16),  
+            child: Text(  
+              item.answer,  
+              style: TextStyle(fontSize: 16),  
+            ),  
+          ),  
+        ],  
+      ),  
+    );  
+  }  
+}  
+
+// Pantalla de registro  
+class RegistroScreen extends StatelessWidget {  
+  final _formKey = GlobalKey<FormState>();  
+  final nombreController = TextEditingController();  
+  final apellidoController = TextEditingController();  
+  final dniController = TextEditingController();  
+
+  void _guardar() {  
+    if (_formKey.currentState!.validate()) {  
+      // Aquí puedes hacer lo que quieras con los datos  
+      print('Nombre: ${nombreController.text}');  
+      print('Apellido: ${apellidoController.text}');  
+      print('DNI: ${dniController.text}');  
+    }  
+  }  
+
+  @override  
+  Widget build(BuildContext context) {  
+    return Scaffold(  
+      appBar: AppBar(  
+        title: Text('Registro de Usuario'),  
+        centerTitle: true,  
+      ),  
+      body: SingleChildScrollView(  
+        padding: const EdgeInsets.all(24.0),  
+        child: Form(  
+          key: _formKey,  
+          child: Column(  
+            children: [  
+              CustomTextField(  
+                labelText: 'Nombre',  
+                controller: nombreController,  
+                prefixIcon: Icons.person,  
+              ),  
+              SizedBox(height: 15),  
+              CustomTextField(  
+                labelText: 'Apellido',  
+                controller: apellidoController,  
+                prefixIcon: Icons.people,  
+              ),  
+              SizedBox(height: 15),  
+              CustomTextField(  
+                labelText: 'DNI',  
+                controller: dniController,  
+                prefixIcon: Icons.credit_card,  
+                keyboardType: TextInputType.number,  
+              ),  
+              SizedBox(height: 25),  
+              ElevatedButton(  
+                onPressed: _guardar,  
+                style: ElevatedButton.styleFrom(  
+                  minimumSize: Size(double.infinity, 50),  
+                ),  
+                child: Text('Guardar', style: TextStyle(fontSize: 18)),  
+              ),  
+            ],  
+          ),  
+        ),  
+      ),  
+    );  
+  }  
+}  
+
+// Calculadora  
+class Calculadora extends StatelessWidget {  
+  @override  
+  Widget build(BuildContext context) {  
+    return Scaffold(  
+      appBar: AppBar(  
+        title: Text('Calculadora'),  
+        centerTitle: true,  
+      ),  
+      body: Container(  
+        color: Color(0xFF1D1E1F),  
+        padding: EdgeInsets.all(16),  
+        child: Column(  
+          mainAxisAlignment: MainAxisAlignment.end,  
+          children: [  
+            Container(  
+              alignment: Alignment.centerRight,  
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 24),  
+              child: Text(  
+                '0',  
+                style: TextStyle(color: Colors.white, fontSize: 60),  
+              ),  
+            ),  
+            SizedBox(height: 20),  
+            filaBotones(['AC', '+/-', '%', '/']),  
+            SizedBox(height: 12),  
+            filaBotones(['7', '8', '9', 'x']),  
+            SizedBox(height: 12),  
+            filaBotones(['4', '5', '6', '-']),  
+            SizedBox(height: 12),  
+            filaBotones(['1', '2', '3', '+']),  
+            SizedBox(height: 12),  
+            filaBotones(['0', '.', '=']),  
+          ],  
+        ),  
+      ),  
+    );  
+  }  
+
+  Widget filaBotones(List<String> botones) {  
+    return Row(  
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,  
+      children: botones.map((texto) {  
+        bool esOperacion = (texto == '/' || texto == 'x' || texto == '-' || texto == '+' || texto == '=');  
+        bool esFuncionEspecial = (texto == 'AC' || texto == '+/-' || texto == '%');  
+
+        return texto == '0'  
+            ? botonCero(texto)  
+            : CalculatorButton(  
+                texto: texto,  
+                isOperator: esOperacion,  
+              );  
+      }).toList(),  
+    );  
+  }  
+
+  Widget botonCero(String texto) {  
+    return Container(  
+      height: 70,  
+      width: 150,  
+      decoration: BoxDecoration(  
+        color: Color(0xFF333333),  
+        borderRadius: BorderRadius.circular(35),  
+      ),  
+      child: Align(  
+        alignment: Alignment.centerLeft,  
+        child: Padding(  
+          padding: const EdgeInsets.only(left: 60),  
+          child: Text(  
+            texto,  
+            style: TextStyle(  
+              fontSize: 28,  
+              color: Colors.white,  
+              fontWeight: FontWeight.bold,  
+            ),  
+          ),  
+        ),  
+      ),  
+    );  
+  }  
+}  
+
+// Botón personalizado para la calculadora  
+class CalculatorButton extends StatelessWidget {  
+  final String texto;  
+  final bool isOperator;  
+
+  const CalculatorButton({  
+    required this.texto,  
+    this.isOperator = false,  
+    Key? key,  
+  }) : super(key: key);  
+
+  @override  
+  Widget build(BuildContext context) {  
+    return Container(  
+      height: 70,  
+      width: 70,  
+      decoration: BoxDecoration(  
+        color: isOperator ? AppColors.secondaryColor : Color(0xFF333333),  
+        shape: BoxShape.circle,  
+      ),  
+      child: Center(  
+        child: Text(  
+          texto,  
+          style: TextStyle(  
+            fontSize: 28,  
+            color: Colors.white,  
+            fontWeight: FontWeight.bold,  
+          ),  
+        ),  
+      ),  
+    );  
+  }  
+}
